@@ -1,0 +1,42 @@
+.elasticsearch-status {
+  border: solid 3px #000;
+  margin: 10px 0;
+  padding: 10px;
+}
+
+.elasticsearch-status__content {
+  display: flex;
+}
+
+.elasticsearch-status__overview {
+
+}
+
+.elasticsearch-status__overview__icon {
+  font-size: 110px;
+  text-align: center;
+}
+
+.elasticsearch-status__overview__text {
+  font-size: 1.5em;
+  text-align: center;
+  font-weight: bold;
+}
+
+.elasticsearch-status__details {
+  list-style: none;
+  margin: 0 0 0 40px;
+  padding: 0;
+  flex-grow: 1;
+}
+
+.elasticsearch-status__buttons {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 170px;
+}
+
+.elasticsearch-status__buttons .elasticsearch-status__button:last-child {
+  margin-bottom: 10px;
+}

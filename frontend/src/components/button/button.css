@@ -1,0 +1,16 @@
+.elasticsearch-status__button {
+  border: solid 2px #000;
+  padding: 10px;
+  display: flex;
+  margin-bottom: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.elasticsearch-status__button__text {
+  margin-left: 10px;
+}
+
+.elasticsearch-status__button:last-child {
+  margin-bottom: 0;
+}

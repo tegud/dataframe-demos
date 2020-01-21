@@ -1,0 +1,79 @@
+{
+  "0-single-run": {
+    "source": {
+      "index": "booking-process*"
+    },
+    "pivot": {
+      "group_by": {
+        "sessionId": {
+          "terms": {
+            "field": "sessionId"
+          }
+        }
+      },
+      "aggregations": {
+        "@timestamp": {
+          "min": {
+            "field": "@timestamp"
+          }
+        }
+      }
+    },
+    "dest": {
+      "index": "booking-journey"
+    }
+  },
+  "1-continuous": {
+    "source": {
+      "index": "booking-process*"
+    },
+    "pivot": {
+      "group_by": {
+        "sessionId": {
+          "terms": {
+            "field": "sessionId"
+          }
+        }
+      },
+      "aggregations": {
+        "@timestamp": {
+          "min": {
+            "field": "@timestamp"
+          }
+        },
+        "lastEvent": {
+          "max": {
+            "field": "@timestamp"
+          }
+        },
+        "duration": { 
+          "bucket_script": {
+            "buckets_path": {
+              "min_time": "@timestamp.value",
+              "max_time": "lastEvent.value"
+            },
+            "script": "(params.max_time - params.min_time)"
+          }
+        },
+        "event-analysis": {
+          "scripted_metric": {
+            "init_script": "state.progress = []",
+            "map_script": "state.progress.add(doc['stage'].value);",
+            "combine_script": "state.progress",
+            "reduce_script": "!!FILE:scripts/event-analysis-reduce.painless!!"
+          }
+        }
+      }
+    },
+    "dest": {
+      "index": "booking-journey"
+    },
+    "frequency": "10s",
+    "sync": {
+      "time": {
+        "field": "@timestamp",
+        "delay": "20s"
+      }
+    }
+  }
+}

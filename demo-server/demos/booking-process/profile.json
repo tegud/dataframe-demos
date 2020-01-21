@@ -1,0 +1,76 @@
+[
+  {
+    "name": "booking-process",
+    "profile": {
+      "defaultConcurrentSessions": 5,
+      "profiles": [
+        {
+          "name": "success",
+          "requests": [
+            { "request": "/booking-process/log-client?stage=payment-button-pressed", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=validate-started", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=validate-finished", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=tokenisation-started", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=tokenisation-finished", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=form-submit", "waitForNext": 1000 },
+            { "request": "/booking-process/log-server?stage=submit-request-handler", "waitForNext": 200 },
+            { "request": "/booking-process/log-server?stage=provider-start", "waitForNext": 2000 },
+            { "request": "/booking-process/log-server?stage=provider-finish", "waitForNext": 200 },
+            { "request": "/booking-process/log-server?stage=booking-complete", "waitForNext": 200 }
+          ]
+        },
+        {
+          "name": "error",
+          "weight": 0.05,
+          "requests": [
+            { "request": "/booking-process/log-client?stage=payment-button-pressed", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=validate-started", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=validate-finished", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=tokenisation-started", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=tokenisation-finished", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=form-submit", "waitForNext": 1000 },
+            { "request": "/booking-process/log-server?stage=submit-request-handler", "waitForNext": 200 },
+            { "request": "/booking-process/log-server?stage=provider-start", "waitForNext": 5000 },
+            { "request": "/booking-process/log-server?stage=error", "waitForNext": 200 }
+          ]
+        },
+        {
+          "name": "drop-out-validation",
+          "weight": 0.03,
+          "requests": [
+            { "request": "/booking-process/log-client?stage=payment-button-pressed", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=validate-started", "waitForNext": 200 }
+          ],
+          "userAgents": [
+            "Mozilla/5.0 (Linux; Android 4.4.3; KFTHWI Build/KTU84M) AppleWebKit/537.36 (KHTML, like Gecko) Silk/47.1.79 like Chrome/47.0.2526.80 Safari/537.36"
+          ]
+        },
+        {
+          "name": "drop-out-tokenisation",
+          "weight": 0.04,
+          "requests": [
+            { "request": "/booking-process/log-client?stage=payment-button-pressed", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=validate-started", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=validate-finished", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=tokenisation-started", "waitForNext": 200 }
+          ],
+          "userAgents": [
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_1) AppleWebKit/500.3.9 (KHTML, like Gecko) Version/7.0.2 Safari/500.3.9",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_1) AppleWebKit/500.5.2 (KHTML, like Gecko) Version/7.2.0 Safari/500.5.2"
+          ]
+        },
+        {
+          "name": "drop-out-before-submit",
+          "weight": 0.03,
+          "requests": [
+            { "request": "/booking-process/log-client?stage=payment-button-pressed", "waitForNext": 10 },
+            { "request": "/booking-process/log-client?stage=validate-started", "waitForNext": 10 },
+            { "request": "/booking-process/log-client?stage=validate-finished", "waitForNext": 10 },
+            { "request": "/booking-process/log-client?stage=tokenisation-started", "waitForNext": 10 },
+            { "request": "/booking-process/log-client?stage=tokenisation-finished", "waitForNext": 10 }
+          ]
+        }
+      ]
+    }
+  }
+]

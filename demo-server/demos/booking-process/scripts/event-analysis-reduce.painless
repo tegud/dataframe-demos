@@ -1,0 +1,32 @@
+def eventProgressMap = [
+  'payment-button-pressed': 0,
+  'validate-started': 1,
+  'validate-finished': 2,
+  'tokenisation-started': 3,
+  'tokenisation-finished': 4,
+  'form-submit': 5,
+  'submit-request-handler': 50,
+  'provider-start': 51,
+  'provider-finish': 52,
+  'error': 75,
+  'booking-complete': 100
+];
+
+def furthestPoint = -1;
+def furthestPointEvent = 'unknown';
+
+for (state in states[0]) {
+  if (eventProgressMap[state] != null && eventProgressMap[state] > furthestPoint) {
+    furthestPoint = eventProgressMap[state];
+    furthestPointEvent = state;
+  }
+}
+
+def result = [
+  'states': states[0],
+  'furthestPoint': furthestPointEvent,
+  'bookingError': states[0].contains('error'),
+  'complete': states[0].contains('booking-complete')
+];
+
+return result;
