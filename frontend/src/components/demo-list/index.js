@@ -43,7 +43,6 @@ export default () => {
         }
   
         if (timeout) {
-          console.log('Setting timeout', timeout);
           theTimer = setTimeout(refresh, timeout);
         }
     };
@@ -61,7 +60,7 @@ export default () => {
 
   return <div>
     <ul className="elasticsearch-demos">
-      {data.map(({ name, indices, transforms }) => <li className="elasticsearch-demos__item">
+      {data.map(({ name, indices, transforms, loadProfiles }) => <li className="elasticsearch-demos__item">
         <h3>{toSentenceCase(name)}</h3>
         <div className="elasticsearch-demos__item__sections">
           <div className="elasticsearch-demos__item__section">
@@ -80,7 +79,6 @@ export default () => {
                 </ul>
               : <div className="elasticsearch-demos__indices__none">No Data</div>}
             <Button icon={faTrash} text="Delete Demo Indices" onClick={doAction.bind(undefined, `/api/delete-all-data?demo=${name}`)} />
-            <Button icon={faSyncAlt} text="Reset Templates" onClick={doAction.bind(undefined, `/api/reset-templates?demo=${name}`)} />
           </div>
           <div className="elasticsearch-demos__item__section">
             <h3><FontAwesomeIcon icon={faFlask} /> Transforms</h3>
@@ -94,7 +92,7 @@ export default () => {
 
                     const buttonsByStatus = {
                       stopped: <Button icon={faPlay} text="Start" onClick={doAction.bind(undefined, `/api/start-transform?demo=${name}&transform=${transform.id}`)} />,
-                      started: <Button icon={faPlay} text="Start" onClick={doAction.bind(undefined, `/api/start-transform?demo=${name}&transform=${transform.id}`)} />,
+                      started: <Button icon={faStop} text="Stop" onClick={doAction.bind(undefined, `/api/stop-transform?demo=${name}&transform=${transform.id}`)} />,
                       completed: <Button icon={faSyncAlt} text="Recreate" onClick={doAction.bind(undefined, `/api/recreate-transform?demo=${name}&transform=${transform.id}`)} />,
                     };
                     
@@ -119,10 +117,34 @@ export default () => {
           <div className="elasticsearch-demos__item__section">
             <h3><FontAwesomeIcon icon={faCrosshairs} /> Load</h3>
 
-            <div className="elasticsearch-demos__load__controls">
-              <Button icon={faPlay} text="Start" />
-              <Button icon={faStop} text="Stop" />
-            </div>
+            <ul className="elasticsearch-demos__load-generator__list">{loadProfiles.map((loadProfile) => {
+              return <li className="elasticsearch-demos__load-generator__list-item">
+                <div className="elasticsearch-demos__load-generator__list-item__text">{loadProfile.name}</div>
+
+                {!loadProfile.running.length
+                  ? <div className="elasticsearch-demos__load-generator__not-running">Not Running</div>
+                  : <ul className="elasticsearch-demos__load-generator__running">
+                    {loadProfile.running.map(({
+                      id,
+                      currentSessions,
+                      totalSessions,
+                      totalRequests,
+                    }) => <li className="elasticsearch-demos__load-generator__running-item">
+                      <div className="elasticsearch-demos__load-generator__running-item__text">
+                        <div>{id}</div>
+                        <div className="elasticsearch-demos__load-generator__running-item__text__sub">Current Sessions: {currentSessions}</div>
+                        <div className="elasticsearch-demos__load-generator__running-item__text__sub">Total Sessions: {totalSessions}</div>
+                        <div className="elasticsearch-demos__load-generator__running-item__text__sub">Total Requests: {totalRequests}</div>
+                      </div>
+                      <div className="elasticsearch-demos__load-generator__running-item__buttons">
+                        <Button icon={faStop} onClick={doAction.bind(undefined, `/api/stop-load-profile?id=${id}`)} />
+                      </div>
+                    </li>)}
+                  </ul>}
+
+                <Button icon={faPlay} text="Start Profile" onClick={doAction.bind(undefined, `/api/start-load-profile?demo=${name}&name=${loadProfile.name}`)} />
+              </li>;
+            })}</ul>
           </div>
         </div>
       </li>)}

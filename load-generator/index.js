@@ -9,9 +9,12 @@ const createProfileRunManager = () => {
   const running = {};
 
   return {
+    stop: (id) => {
+      running[id].stop();
+    },
     start: (name, profiles) => {
       console.log(`Creating new runner for ${name}`);
-      const { id, ...newRunner } = createProfileRunner(profiles);
+      const { id, ...newRunner } = createProfileRunner(name, profiles);
       running[id] = newRunner;
       newRunner.start();
       newRunner.on('complete', () => {
@@ -25,6 +28,7 @@ const createProfileRunManager = () => {
       return Object.fromEntries(runningEntries.map(([key, value]) => [
         key,
         {
+          name: value.name,
           ...value.getStatus(),
           ...value.getStats(),
         },
@@ -45,6 +49,14 @@ app.post('/start', json(), async (req, res) => {
   const id = await profileRunner.start(name, profile);
 
   res.json({ id });
+});
+
+app.post('/stop', async (req, res) => {
+  const { id } = req.query;
+
+  await profileRunner.stop(id);
+
+  res.json({});
 });
 
 app.listen(3031, (err) => {

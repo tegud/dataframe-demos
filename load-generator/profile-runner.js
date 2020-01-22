@@ -27,7 +27,7 @@ const calculateFinish = (maxDuration) => {
   return Date.now() + duration;
 };
 
-module.exports = ({ defaultConcurrentSessions = 1, maxSessions, maxDuration, profiles }) => {
+module.exports = (name, { defaultConcurrentSessions = 1, maxSessions, maxDuration, profiles }) => {
   const id = uuidv4();
   const events = new EventEmitter();
   let totalSessions = 0;
@@ -83,9 +83,13 @@ module.exports = ({ defaultConcurrentSessions = 1, maxSessions, maxDuration, pro
   };
 
   return {
+    name,
     id,
     start: () => tick(),
-    stop: () => clearTimeout(nextTick),
+    stop: () => {
+      clearTimeout(nextTick);
+      events.emit('complete');
+    },
     on: (...args) => events.on(...args),
     getStats: () => ({
       currentSessions: Object.keys(openSessions).length,

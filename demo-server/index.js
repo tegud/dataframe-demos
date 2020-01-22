@@ -64,11 +64,11 @@ const standardSetup = async (name, { templates, transforms }) => {
 
 (async () => {
   try {
-    await Promise.all(demoModules.filter(({ setup }) => setup).map(({ name, setup }) => {
-      if (typeof setup === 'object') {
-        return standardSetup(name, setup);
-      } else {
+    await Promise.all(demoModules.filter(({ setup }) => setup).map(({ name, setup, templates, transforms }) => {
+      if (typeof setup === 'function') {
         return setup();
+      } else {
+        return standardSetup(name, { templates, transforms });
       }
     }));
   } catch (e) {

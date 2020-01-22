@@ -20,6 +20,22 @@
           ]
         },
         {
+          "name": "success-form-timeout",
+          "weight": 0.01,
+          "requests": [
+            { "request": "/booking-process/log-client?stage=payment-button-pressed", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=validate-started", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=validate-finished", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=tokenisation-started", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=tokenisation-finished", "waitForNext": 200 },
+            { "request": "/booking-process/log-client?stage=form-submit", "waitForNext": 10000 },
+            { "request": "/booking-process/log-server?stage=submit-request-handler", "waitForNext": 200 },
+            { "request": "/booking-process/log-server?stage=provider-start", "waitForNext": 2000 },
+            { "request": "/booking-process/log-server?stage=provider-finish", "waitForNext": 200 },
+            { "request": "/booking-process/log-server?stage=booking-complete", "waitForNext": 200 }
+          ]
+        },
+        {
           "name": "error",
           "weight": 0.05,
           "requests": [

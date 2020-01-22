@@ -56,5 +56,4 @@ module.exports = {
   templates,
   transforms,
   loadProfiles: require('./profile.json'),
-  setup: { templates, transforms },
 };

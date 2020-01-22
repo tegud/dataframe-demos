@@ -1,6 +1,16 @@
 const express = require('express');
 const axios = require('axios');
 
+const getLoadData = async () => {
+  try {
+    const { data } = await axios('http://localhost:3031');
+
+    return data;
+  } catch (e) {
+    console.log(`Could not contact load generator: ${e.message}`);
+  }
+};
+
 module.exports = (elasticsearchClient, demoModules) => {
   const router = express.Router();
 
@@ -23,6 +33,18 @@ module.exports = (elasticsearchClient, demoModules) => {
       allow_no_indices: true,
     });
   };
+
+  const startLoadProfile = async (demo, name) => {
+    const [matchingDemo] = demoModules.filter(({ name }) => name === demo);
+
+    const [loadProfile] = matchingDemo.loadProfiles.filter((profile) => profile.name === name);
+
+    await axios({ url: 'http://localhost:3031/start', data: loadProfile, method: 'POST' });
+  };
+  
+  const stopLoadProfile = async (id) => {
+    await axios({ url: `http://localhost:3031/stop?id=${id}`, method: 'POST' });
+  };
   
   router
     .get('/elasticsearch-health', async (req, res) => {
@@ -39,7 +61,7 @@ module.exports = (elasticsearchClient, demoModules) => {
         allIndices,
         allTransforms,
         transformStats,
-        { data },
+        loadData,
       ] = await Promise.all([
         elasticsearchClient.cat.indices({ format: 'json' }),
         elasticsearchClient.transform.getTransform({
@@ -52,12 +74,11 @@ module.exports = (elasticsearchClient, demoModules) => {
           size: 100,
           allow_no_match: true
         }),
-        axios('http://localhost:3031'),
+        getLoadData(),
       ]);
 
-      console.log(data);
-
       res.json({
+        loadServerAlive: loadData ? true : false,
         demos: demoModules.map(({ name, loadProfiles, matchesIndices, ...rest }) => {
           const indices = matchesIndices
             ? matchesIndices(allIndices.body)
@@ -78,7 +99,17 @@ module.exports = (elasticsearchClient, demoModules) => {
               }
             });
 
-          return { name, indices, transforms, loadProfiles: loadProfiles.map(({ name }) => name) };
+          return { name, indices, transforms, loadProfiles: loadProfiles.map(({ name }) => {
+            return {
+              name,
+              running: Object.entries(loadData.running)
+                .filter(([, value]) => name === value.name)
+                .map(([id, value]) => ({
+                  id,
+                  ...value,
+                })),
+            };
+          }) };
         }),
       });
     })
@@ -111,6 +142,20 @@ module.exports = (elasticsearchClient, demoModules) => {
       });
       res.json({});
     })
-    .post('/reset-templates', async (req, res) => res.json({}));
+    .post('/reset-templates', async (req, res) => res.json({}))
+    .post('/start-load-profile', async (req, res) => {
+      const { demo, name } = req.query;
+
+      startLoadProfile(demo, name);
+
+      res.json({});
+    })
+    .post('/stop-load-profile', async (req, res) => {
+      const { id } = req.query;
+
+      stopLoadProfile(id);
+
+      res.json({});
+    });
   return router;
 };

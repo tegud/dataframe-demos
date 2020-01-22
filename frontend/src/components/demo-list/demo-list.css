@@ -87,3 +87,38 @@
 
 .elasticsearch-demos__load__controls .elasticsearch-status__button { margin-bottom: 0; width: 50%; }
 
+.elasticsearch-demos__load-generator__list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.elasticsearch-demos__load-generator__running {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px 0;
+}
+
+.elasticsearch-demos__load-generator__running-item {
+  padding: 5px 0;
+  border-top: solid 1px #000;
+  border-bottom: solid 1px #000;
+  display: flex;
+}
+
+.elasticsearch-demos__load-generator__list-item__text {
+  font-weight: bold;
+}
+
+.elasticsearch-demos__load-generator__not-running {
+  padding: 10px 0;
+}
+
+.elasticsearch-demos__load-generator__running-item__text__sub {
+  font-style: italic;
+  padding-left: 15px;
+}
+
+.elasticsearch-demos__load-generator__running-item__buttons {
+  margin-left: 10px;
+}
