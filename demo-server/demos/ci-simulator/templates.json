@@ -1,0 +1,35 @@
+{
+  "events": {
+    "index_patterns": ["ci-events*", "ci-git-events"],
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "buildRevision": {
+          "type": "keyword"
+        },
+        "pipeline": {
+          "type": "keyword"
+        },
+        "stage": {
+          "type": "keyword"
+        },
+        "event": {
+          "type": "keyword"
+        },
+        "level": {
+          "type": "keyword"
+        }
+      }
+    }
+  },
+  "build-performance": {
+    "index_patterns": ["build-performance*"],
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    }
+  }
+}

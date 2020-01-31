@@ -1,0 +1,7 @@
+state.events.add([
+  '@timestamp': doc['@timestamp'],
+  'message': doc['message.keyword'].value,
+  'provider': doc['provider'].value,
+  'hotelId': doc['hotelId'].value,
+  'rate': doc['rate'].value
+]);

@@ -1,0 +1,44 @@
+{
+  "0-rate-accuracy": {
+    "source": {
+      "index": "rate-logging*",
+      "query": {
+        "match_all": {}
+      }
+    },
+    "dest": {
+      "index": "rate-accuracy"
+    },
+    "frequency": "5s",
+    "sync": {
+      "time": {
+        "field": "@timestamp",
+        "delay": "20s"
+      }
+    },
+    "pivot": {
+      "group_by": {
+        "searchId": {
+          "terms": {
+            "field": "searchId"
+          }
+        }
+      },
+      "aggregations": {
+        "@timestamp": {
+          "min": {
+            "field": "@timestamp"
+          }
+        },
+        "accuracy": {
+            "scripted_metric": {
+                "init_script": "state.events = [];",
+                "map_script": "!!FILE:scripts/accuracy-map.painless!!",
+                "combine_script": "state.events",
+                "reduce_script": "!!FILE:scripts/accuracy-reduce.painless!!"
+            }
+        }
+      }
+    }
+  }
+}

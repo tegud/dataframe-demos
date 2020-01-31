@@ -1,0 +1,38 @@
+def pipeline = [ 'stages': [:] ];
+for (state in states) {
+  for (event in state) {
+    if (event['message'] == 'Git Commit') {
+      pipeline['commitAt'] = event['@timestamp'];
+      pipeline['commitAtMillis'] = event['timestampMillis'];
+    }
+
+    if (event['message'] == 'CI Event') {
+      def stage = event['stage'];
+
+      pipeline['name'] = event['pipeline'];
+      if (pipeline.stages[stage] == null) {
+        pipeline.stages[stage] = [:];
+      }
+      
+      if (event['event'] == 'start') {
+        pipeline.stages[stage]['started'] = event['@timestamp'];
+        pipeline.stages[stage]['startedMillis'] = event['timestampMillis'];
+      }
+      
+      if (event['event'] == 'completed') {
+        pipeline.stages[stage]['completed'] = event['@timestamp'];
+        pipeline.stages[stage]['completedMillis'] = event['timestampMillis'];
+      }
+
+      if (pipeline.stages[stage]['started'] != null && pipeline.stages[stage]['completed'] != null) {
+        pipeline.stages[stage]['duration'] = pipeline.stages[stage]['completedMillis'] - pipeline.stages[stage]['startedMillis'];
+      }
+    }
+
+    if (pipeline['commitAtMillis'] != null && pipeline.stages['build'] != null && pipeline.stages['build']['startedMillis'] != null) {
+      pipeline['queuingTime'] = pipeline.stages['build']['startedMillis'] - pipeline['commitAtMillis'];
+    }
+  }
+}
+
+return pipeline;

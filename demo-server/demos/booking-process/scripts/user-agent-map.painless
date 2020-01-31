@@ -1,0 +1,9 @@
+state.agents.add([
+  'ua': doc['agent.ua'].value,
+  'browser.major': doc['agent.browser.major.keyword'].value,
+  'browser.name': doc['agent.browser.name.keyword'].value,
+  'browser.version': doc['agent.browser.version.keyword'].value,
+  'engine.name': doc['agent.engine.name.keyword'].value,
+  'engine.version': doc['agent.engine.version.keyword'].value,
+  'os.name': doc['agent.os.name.keyword'].value
+]);

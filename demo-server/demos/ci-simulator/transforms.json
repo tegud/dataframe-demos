@@ -1,0 +1,102 @@
+{
+  "0-working": {
+    "source": {
+        "index": "ci-*",
+        "query": {
+            "match_all": {}
+        }
+    },
+    "dest": {
+        "index": "build-performance"
+    },
+    "frequency": "60s",
+    "sync": {
+        "time": {
+            "field": "@timestamp",
+            "delay": "3m"
+        }
+    },
+    "pivot": {
+        "group_by": {
+            "buildRevision": {
+                "terms": {
+                    "field": "buildRevision"
+                }
+            }
+        },
+        "aggregations": {
+            "@timestamp": {
+                "min": {
+                    "field": "@timestamp"
+                }
+            },
+            "lastEvent": {
+                "max": {
+                    "field": "@timestamp"
+                }
+            },
+            "eventCount": {
+              "value_count" : { "field" : "buildRevision" }
+            },
+            "pipeline": {
+                "scripted_metric": {
+                    "init_script": "state.events = [];",
+                    "map_script": "!!FILE:scripts/pipeline-map.painless!!",
+                    "combine_script": "state.events",
+                    "reduce_script": "!!FILE:scripts/pipeline-reduce.painless!!"
+                }
+            }
+        }
+    }
+  },
+  "1-error": {
+    "source": {
+        "index": "ci-*",
+        "query": {
+            "match_all": {}
+        }
+    },
+    "dest": {
+        "index": "build-performance"
+    },
+    "frequency": "10s",
+    "sync": {
+        "time": {
+            "field": "@timestamp",
+            "delay": "10s"
+        }
+    },
+    "pivot": {
+        "group_by": {
+            "buildRevision": {
+                "terms": {
+                    "field": "buildRevision"
+                }
+            }
+        },
+        "aggregations": {
+            "@timestamp": {
+                "min": {
+                    "field": "@timestamp"
+                }
+            },
+            "lastEvent": {
+                "max": {
+                    "field": "@timestamp"
+                }
+            },
+            "eventCount": {
+              "value_count" : { "field" : "buildRevision" }
+            },
+            "agent": {
+              "scripted_metric": {
+                  "init_script": "state.agents = null",
+                  "map_script": "state.agents.push('broken');",
+                  "combine_script": "state.agents[0]",
+                  "reduce_script": "def result = states[0]; return result;"
+              }
+            }
+        }
+    }
+  }
+}

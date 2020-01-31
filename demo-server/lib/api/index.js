@@ -1,6 +1,9 @@
 const express = require('express');
 const axios = require('axios');
 
+const { wait } = require('../utilities');
+const { setupDemo } = require('../setup-demo');
+
 const getLoadData = async () => {
   try {
     const { data } = await axios('http://localhost:3031');
@@ -11,9 +14,27 @@ const getLoadData = async () => {
   }
 };
 
+const getExistingTransforms = async (elasticsearchClient, matchingDemo) => {
+  const {
+    transforms = []
+  } = matchingDemo;
+
+  const allTransforms = await elasticsearchClient.transform.getTransform({
+    transform_id: '_all',
+    size: 100,
+    allow_no_match: true
+  });
+
+  const existingTransforms = allTransforms.body.transforms.map(({ id }) => id);
+
+  return Object.keys(transforms)
+    .map((id) => `${matchingDemo.name}__${id}`)
+    .filter((id) => existingTransforms.includes(id));
+}
+
 module.exports = (elasticsearchClient, demoModules) => {
   const router = express.Router();
-
+  
   const transformToggle = async (enable, req, res) => {
     try {
       await elasticsearchClient.transform[enable ? 'startTransform' : 'stopTransform']({ transformId: req.query.transform });
@@ -25,13 +46,24 @@ module.exports = (elasticsearchClient, demoModules) => {
     res.json({});
   };
 
+  const stopTransforms = async (transformIds) => {
+    await Promise.all(transformIds.map((transformId) => elasticsearchClient.transform.stopTransform({ transformId })));
+  };
+
+  const removeTransforms = async (transformIds) => {
+    await Promise.all(transformIds.map((transformId) => elasticsearchClient.transform.deleteTransform({ transformId })));
+  };
+
   const clearData = async (demo) => {
     const [matchingDemo] = demoModules.filter(({ name }) => name === demo);
 
-    await elasticsearchClient.indices.delete({
-      index: matchingDemo.indices.join(','),
-      allow_no_indices: true,
-    });
+    try {
+      await elasticsearchClient.indices.delete({
+        index: matchingDemo.indices.join(','),
+        allow_no_indices: true,
+      });
+    } catch (e) {
+    }
   };
 
   const startLoadProfile = async (demo, name) => {
@@ -133,6 +165,38 @@ module.exports = (elasticsearchClient, demoModules) => {
     })
     .post('/delete-all-data', async (req, res) => {
       await clearData(req.query.demo);
+      res.json({});
+    })
+    .post('/tear-down-demo', async (req, res) => {
+      const { demo } = req.query;
+      const loadData = await getLoadData();
+
+      await Promise.all(Object.entries(loadData.running)
+        .filter(([, { name }]) => name === demo)
+        .map(([id]) => id).map(id => stopLoadProfile(id)));
+ 
+      const [matchingDemo] = demoModules.filter(({ name }) => name === demo);
+
+      if (!matchingDemo) {
+        return;
+      }
+
+      const transformIds = await getExistingTransforms(elasticsearchClient, matchingDemo);
+ 
+      await stopTransforms(transformIds);
+      await wait(1000);
+      await removeTransforms(transformIds);
+      await clearData(demo);
+
+      res.json({});
+    })
+    .post('/setup-demo', async (req, res) => {
+      const { demo } = req.query;
+      
+      const [matchingDemo] = demoModules.filter(({ name }) => name === demo);
+      
+      setupDemo(elasticsearchClient, matchingDemo);
+
       res.json({});
     })
     .post('/delete-index', async (req, res) => {

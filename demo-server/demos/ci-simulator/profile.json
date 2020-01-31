@@ -1,0 +1,25 @@
+[
+  {
+    "name": "ci-simulator",
+    "profile": {
+      "sessionId": {
+        "type": "git-hash",
+        "parameterName": "x-build-revision"
+      },
+      "defaultConcurrentSessions": 3,
+      "profiles": [
+        {
+          "name": "success",
+          "requests": [
+            { "waitForNext": { "from": 0, "to": 5, "unit": "seconds" } },
+            { "request": "/ci-simulator/git-webhook", "waitForNext": 10000 },
+            { "request": "/ci-simulator/ci-webhook?pipeline=build-test&stage=build&event=start", "waitForNext": 45000 },
+            { "request": "/ci-simulator/ci-webhook?pipeline=build-test&stage=build&event=completed", "waitForNext": 2500 },
+            { "request": "/ci-simulator/ci-webhook?pipeline=build-test&stage=test&event=start", "waitForNext": 75000 },
+            { "request": "/ci-simulator/ci-webhook?pipeline=build-test&stage=test&event=completed", "waitForNext": 100 }
+          ]
+        }
+      ]
+    }
+  }
+]

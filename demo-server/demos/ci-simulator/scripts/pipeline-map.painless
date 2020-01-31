@@ -1,0 +1,18 @@
+if (doc['message.keyword'].value == 'Git Commit') {
+  state.events.add([
+    'message': doc['message.keyword'].value,
+    '@timestamp': doc['@timestamp'].value,
+    'timestampMillis': doc['@timestamp'].value.millis
+  ]);
+}
+
+if (doc['message.keyword'].value == 'CI Event') {
+  state.events.add([
+    '@timestamp': doc['@timestamp'],
+    'timestampMillis': doc['@timestamp'].value.millis,
+    'message': doc['message.keyword'].value,
+    'pipeline': doc['pipeline'].value,
+    'stage': doc['stage'].value,
+    'event': doc['event'].value
+  ]);
+}

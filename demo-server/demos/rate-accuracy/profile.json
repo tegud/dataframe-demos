@@ -1,0 +1,125 @@
+[
+  {
+    "name": "rate-accuracy",
+    "profile": {
+      "defaultConcurrentSessions": 8,
+      "sessionId": {
+        "type": "uuid",
+        "parameterName": "x-search-id"
+      },
+      "profiles": [
+        {
+          "name": "LateRoms",
+          "variables": {
+            "hotelId": { "type": "randomNumber", "from": 1000, "to": 1100 },
+            "rate": { "type": "randomNumber", "from": 90, "to": 150 }
+          },
+          "requests": [
+            { "request": "/rate-accuracy/search?provider=LateRoms&hotelId=<hotelId>&rate=<rate>", "waitForNext": 200 },
+            { "request": "/rate-accuracy/hotel-details?provider=LateRoms&hotelId=<hotelId>&rate=<rate>", "waitForNext": 200 }
+          ]
+        },
+        {
+          "name": "Lilton-Accurate",
+          "weight": 0.08,
+          "variables": {
+            "hotelId": { "type": "randomNumber", "from": 1101, "to": 1180 },
+            "rate": { "type": "randomNumber", "from": 170, "to": 200 }
+          },
+          "requests": [
+            { "request": "/rate-accuracy/search?provider=lilton&hotelId=<hotelId>&rate=<rate>", "waitForNext": 200 },
+            { "request": "/rate-accuracy/hotel-details?provider=lilton&hotelId=<hotelId>&rate=<rate>", "waitForNext": 200 }
+          ]
+        },
+        {
+          "name": "Lilton-Inaccurate",
+          "weight": 0.02,
+          "variables": {
+            "hotelId": { "type": "randomNumber", "from": 1101, "to": 1180 },
+            "searchRate": { "type": "randomNumber", "from": 170, "to": 200 },
+            "detailsRate": { "type": "randomNumber", "from": 170, "to": 200 }
+          },
+          "requests": [
+            { "request": "/rate-accuracy/search?provider=lilton&hotelId=<hotelId>&rate=<searchRate>", "waitForNext": 200 },
+            { "request": "/rate-accuracy/hotel-details?provider=lilton&hotelId=<hotelId>&rate=<detailsRate>", "waitForNext": 200 }
+          ]
+        },
+        {
+          "name": "WorstEastern-Accurate",
+          "weight": 0.10,
+          "variables": {
+            "hotelId": { "type": "randomNumber", "from": 1181, "to": 1220 },
+            "rate": { "type": "randomNumber", "from": 70, "to": 110 }
+          },
+          "requests": [
+            { "request": "/rate-accuracy/search?provider=worst-eastern&hotelId=<hotelId>&rate=<rate>", "waitForNext": 200 },
+            { "request": "/rate-accuracy/hotel-details?provider=worst-eastern&hotelId=<hotelId>&rate=<rate>", "waitForNext": 200 }
+          ]
+        },
+        {
+          "name": "WorstEastern=Inaccurate",
+          "weight": 0.01,
+          "variables": {
+            "hotelId": { "type": "randomNumber", "from": 1181, "to": 1220 },
+            "searchRate": { "type": "randomNumber", "from": 70, "to": 110 },
+            "detailsRate": { "type": "randomNumber", "from": 70, "to": 110 }
+          },
+          "requests": [
+            { "request": "/rate-accuracy/search?provider=worst-eastern&hotelId=<hotelId>&rate=<searchRate>", "waitForNext": 200 },
+            { "request": "/rate-accuracy/hotel-details?provider=worst-eastern&hotelId=<hotelId>&rate=<detailsRate>", "waitForNext": 200 }
+          ]
+        },
+        {
+          "name": "Ian-Accurate",
+          "weight": 0.10,
+          "variables": {
+            "hotelId": { "type": "randomNumber", "from": 1221, "to": 1400 },
+            "rate": { "type": "randomNumber", "from": 80, "to": 150 }
+          },
+          "requests": [
+            { "request": "/rate-accuracy/search?provider=ian&hotelId=<hotelId>&rate=<rate>", "waitForNext": 200 },
+            { "request": "/rate-accuracy/hotel-details?provider=ian&hotelId=<hotelId>&rate=<rate>", "waitForNext": 200 }
+          ]
+        },
+        {
+          "name": "Ian-Inaccurate",
+          "weight": 0.05,
+          "variables": {
+            "hotelId": { "type": "randomNumber", "from": 1221, "to": 1400 },
+            "searchRate": { "type": "randomNumber", "from": 80, "to": 150 },
+            "detailsRate": { "type": "randomNumber", "from": 80, "to": 150 }
+          },
+          "requests": [
+            { "request": "/rate-accuracy/search?provider=ian&hotelId=<hotelId>&rate=<searchRate>", "waitForNext": 200 },
+            { "request": "/rate-accuracy/hotel-details?provider=ian&hotelId=<hotelId>&rate=<detailsRate>", "waitForNext": 200 }
+          ]
+        },
+        {
+          "name": "IHH-Accurate",
+          "weight": 0.05,
+          "variables": {
+            "hotelId": { "type": "randomNumber", "from": 1401, "to": 1450 },
+            "rate": { "type": "randomNumber", "from": 110, "to": 140 }
+          },
+          "requests": [
+            { "request": "/rate-accuracy/search?provider=ihh&hotelId=<hotelId>&rate=<rate>", "waitForNext": 200 },
+            { "request": "/rate-accuracy/hotel-details?provider=ihh&hotelId=<hotelId>&rate=<rate>", "waitForNext": 200 }
+          ]
+        },
+        {
+          "name": "IHH-Inaccurate",
+          "weight": 0.01,
+          "variables": {
+            "hotelId": { "type": "randomNumber", "from": 1401, "to": 1450 },
+            "searchRate": { "type": "randomNumber", "from": 110, "to": 140 },
+            "detailsRate": { "type": "randomNumber", "from": 110, "to": 140 }
+          },
+          "requests": [
+            { "request": "/rate-accuracy/search?provider=ihh&hotelId=<hotelId>&rate=<searchRate>", "waitForNext": 200 },
+            { "request": "/rate-accuracy/hotel-details?provider=ihh&hotelId=<hotelId>&rate=<detailsRate>", "waitForNext": 200 }
+          ]
+        }
+      ]
+    }
+  }
+]

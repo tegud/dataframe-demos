@@ -5,22 +5,58 @@ const EventEmitter = require('events');
 const { randomNumber, wait } = require('./common/utilities');
 const { generateProbabilitySet } = require('./common/probability-set');
 
+const convertToMilliseconds = (time, unit) => {
+  if (unit === 'seconds') {
+    return time * 1000;
+  }
+
+  if (unit === 'minutes') {
+    return time * 1000 * 60;
+  }
+  
+  if (unit === 'hours') {
+    return time * 1000 * 60 * 60;
+  }
+  
+  return time;
+}
+
 const calculateJitter = (timeInMs) => {
+  if (typeof timeInMs === 'object') {
+    const { from = 0, to, unit = 'milliesconds' }  = timeInMs;
+
+    const randomTime = randomNumber(from, to);
+    const timeToWait = convertToMilliseconds(randomTime, unit);
+
+    return timeToWait;
+  }
+
   const jitter = timeInMs / 3;
 
   return randomNumber(timeInMs - jitter, timeInMs + jitter);
 };
 
-const doRequest = async ({ id, agent }, { request }) => {
-  const url = `http://localhost:3030${request}`;
+const getSessionHeader = ({ sessionId: { parameterName = 'x-session-id' } = {} }, id) => Object.fromEntries([[parameterName, id]]);
+
+const requestFillpointRegex = /<([a-z]+)>/ig;
+const interpolateVariables = (request, variables) => request
+  .replace(requestFillpointRegex, (all, name) => variables[name] || all);
+
+const doRequest = async ({ id, agent, ...variables }, { request }, profile) => {
+  if (!request) {
+    return;
+  }
+
+  const url = `http://localhost:3030${interpolateVariables(request, variables)}`;
+  const headers = {
+    ...getSessionHeader(profile, id),
+    'User-Agent': agent,
+  };
 
   const result = await axios({
     url,
     validateResponse: () => true,
-    headers: {
-      'x-session-id': id,
-      'User-Agent': agent,
-    },
+    headers,
   });
 
   return result;
@@ -47,11 +83,40 @@ const pickRandomAgent = ({
   ? { agent }
   : agent)).pick();
 
-module.exports = (profile) => {
-  const id = uuidv4();
+const generateSessionId = ({ sessionId: { type = 'uuid' } = {} }) => {
+  if (type === 'git-hash') {
+    return `${uuidv4()}${uuidv4()}`.replace(/-/g, '').substring(0, 40);
+  }
+
+  return uuidv4();
+};
+
+const createVariableValue = ({ type, ...config }) => {
+  if (type === 'randomNumber') {
+    const { from = 0, to } = config;
+
+    return randomNumber(from, to);
+  }
+
+  return undefined;
+};
+
+const createVariables = ({ variables = {} }) => {
+  const variableEntries = Object.entries(variables);
+
+  return variableEntries.reduce((all, [key, value]) => {
+    all[key] = createVariableValue(value);
+
+    return all;
+  }, {});
+}
+
+module.exports = (profile, settings) => {
+  const id = generateSessionId(settings);
   const remainingSteps = [...profile.requests];
   const events = new EventEmitter();
   const { agent } = pickRandomAgent(profile);
+  const variables = createVariables(profile);
 
   const doNextStep = async () => {
     const nextStep = remainingSteps.shift();
@@ -63,7 +128,7 @@ module.exports = (profile) => {
 
     events.emit('requestStarted', id);
 
-    await doRequest({ id, agent: agent }, nextStep);
+    await doRequest({ id, agent: agent, ...variables }, nextStep, settings);
 
     events.emit('requestCompleted', id);
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { faServer, faFlask, faCrosshairs, faSyncAlt, faTrash, faPlay, faStop, faCog } from '@fortawesome/free-solid-svg-icons';
+import { faServer, faFlask, faCrosshairs, faSyncAlt, faTrash, faPlay, faStop, faCog, faRadiationAlt, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import Button from '../button';
@@ -61,6 +61,10 @@ export default () => {
   return <div>
     <ul className="elasticsearch-demos">
       {data.map(({ name, indices, transforms, loadProfiles }) => <li className="elasticsearch-demos__item">
+        <div className="elasticsearch-demos__item__buttons">
+          <Button icon={faUpload} text="Setup" onClick={doAction.bind(undefined, `/api/setup-demo?demo=${name}`)} ></Button>
+          <Button icon={faRadiationAlt} text="Tear Down" onClick={doAction.bind(undefined, `/api/tear-down-demo?demo=${name}`)} ></Button>
+        </div>
         <h3>{toSentenceCase(name)}</h3>
         <div className="elasticsearch-demos__item__sections">
           <div className="elasticsearch-demos__item__section">
@@ -73,7 +77,7 @@ export default () => {
                       <i>{rest['docs.count']} docs/{rest['store.size']}</i>
                     </div>
                     <div className="elasticsearch-demos__indices__index__buttons">
-                      <Button icon={faTrash} onClick={doAction.bind(undefined, `/api/delete-index?index=${index}`)}  />
+                      <Button icon={faTrash} onClick={doAction.bind(undefined, `/api/delete-index?index=${index}`)} />
                     </div>
                   </li>)}
                 </ul>
@@ -110,7 +114,7 @@ export default () => {
                     </li>;
                   })}
                 </ul>
-              : <div className="elasticsearch-demos__indices__none">No Data</div>}
+              : <div className="elasticsearch-demos__indices__none">No Transforms</div>}
               
               <li><a href="http://localhost:5601/app/kibana#/management/elasticsearch/transform/transform_management" target="_blank"><Button icon={faCog} text="Management"/></a></li>
           </div>

@@ -27,7 +27,7 @@ const calculateFinish = (maxDuration) => {
   return Date.now() + duration;
 };
 
-module.exports = (name, { defaultConcurrentSessions = 1, maxSessions, maxDuration, profiles }) => {
+module.exports = (name, { defaultConcurrentSessions = 1, maxSessions, maxDuration, profiles, ...settings }) => {
   const id = uuidv4();
   const events = new EventEmitter();
   let totalSessions = 0;
@@ -60,7 +60,7 @@ module.exports = (name, { defaultConcurrentSessions = 1, maxSessions, maxDuratio
     for(let x = 0; x < missingSessions; x++) {
       const profile = pickProfile(probabilitySet, profiles);
 
-      const newSession = createSession(profile);
+      const newSession = createSession(profile, settings);
 
       openSessions[newSession.id] = newSession;
       console.log(`  Starting Session \t${profile.name}\t\t${newSession.id}`);

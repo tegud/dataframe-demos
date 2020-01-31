@@ -1,0 +1,30 @@
+def accuracy = [:];
+
+for (state in states) {
+  for (event in state) {
+    if (accuracy['provider'] == null) {
+      accuracy['provider'] = event['provider'];
+      accuracy['hotelId'] = event['hotelId'];
+    }
+
+    if (event['message'] == 'Search Result Clicked') {
+      accuracy['searchRate'] = event['rate'];
+    }
+
+    if (event['message'] == 'Hotel Details Loaded') {
+      accuracy['detailsRate'] = event['rate'];
+    }
+
+    if (accuracy['searchRate'] != null && accuracy['detailsRate'] != null) {
+      if (accuracy['searchRate'] == accuracy['detailsRate']) {
+        accuracy['rateAccurate'] = 'exact';
+      } else if (accuracy['searchRate'] > accuracy['detailsRate']) {
+        accuracy['rateAccurate'] = 'searchMoreExpensive';
+      } else {
+        accuracy['rateAccurate'] = 'searchCheaper';
+      }
+    }
+  }
+}
+
+return accuracy;

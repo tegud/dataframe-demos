@@ -1,0 +1,54 @@
+{
+  "log": {
+    "index_patterns": ["rate-logging*"],
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "searchId": {
+          "type": "keyword"
+        },
+        "provider": {
+          "type": "keyword"
+        },
+        "hotelId": {
+          "type": "keyword"
+        },
+        "rate": {
+          "type": "float"
+        }
+      }
+    }
+  },
+  "accuracy": {
+    "index_patterns": ["rate-accuracy*"],
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "searchId": {
+          "type": "keyword"
+        },
+        "provider": {
+          "type": "keyword"
+        },
+        "hotelId": {
+          "type": "keyword"
+        },
+        "rateAccurate": {
+          "type": "keyword"
+        },
+        "searchRate": {
+          "type": "float"
+        },
+        "detailsRate": {
+          "type": "float"
+        }
+      }
+    }
+  }
+}

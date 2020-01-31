@@ -55,6 +55,14 @@
             "script": "(params.max_time - params.min_time)"
           }
         },
+        "agent": {
+          "scripted_metric": {
+              "init_script": "state.agents = []",
+              "map_script": "!!FILE:scripts/user-agent-map.painless!!",
+              "combine_script": "state.agents[0]",
+              "reduce_script": "def result = states[0]; return result;"
+          }
+        },
         "event-analysis": {
           "scripted_metric": {
             "init_script": "state.progress = []",
@@ -73,6 +81,67 @@
       "time": {
         "field": "@timestamp",
         "delay": "20s"
+      }
+    }
+  },
+  "1-delayed": {
+    "source": {
+      "index": "booking-process*"
+    },
+    "pivot": {
+      "group_by": {
+        "sessionId": {
+          "terms": {
+            "field": "sessionId"
+          }
+        }
+      },
+      "aggregations": {
+        "@timestamp": {
+          "min": {
+            "field": "@timestamp"
+          }
+        },
+        "lastEvent": {
+          "max": {
+            "field": "@timestamp"
+          }
+        },
+        "duration": { 
+          "bucket_script": {
+            "buckets_path": {
+              "min_time": "@timestamp.value",
+              "max_time": "lastEvent.value"
+            },
+            "script": "(params.max_time - params.min_time)"
+          }
+        },
+        "agent": {
+          "scripted_metric": {
+              "init_script": "state.agents = []",
+              "map_script": "!!FILE:scripts/user-agent-map.painless!!",
+              "combine_script": "state.agents[0]",
+              "reduce_script": "def result = states[0]; return result;"
+          }
+        },
+        "event-analysis": {
+          "scripted_metric": {
+            "init_script": "state.progress = []",
+            "map_script": "state.progress.add(doc['stage'].value);",
+            "combine_script": "state.progress",
+            "reduce_script": "!!FILE:scripts/event-analysis-reduce.painless!!"
+          }
+        }
+      }
+    },
+    "dest": {
+      "index": "booking-journey-delayed"
+    },
+    "frequency": "10s",
+    "sync": {
+      "time": {
+        "field": "@timestamp",
+        "delay": "10m"
       }
     }
   }
